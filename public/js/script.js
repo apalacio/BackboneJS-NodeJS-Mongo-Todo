@@ -89,7 +89,7 @@ $(function(){
 			$(this.el).html(this.template(this.model.toJSON() ));
 			this.setText();
 			return this;
-		}
+		},
 		
 		// To avoid XSS (not that if would be harmful in this particular app),
 		// we use 'jquery.text' to set the contents of the todo item
@@ -99,17 +99,122 @@ $(function(){
 			
 			this.input = this.$('.todo-input');
 			this.input.bind('blur', _.bind(this.close, this)).value(text);   //??????
-		}
+		},
 		
 		// Toggle the 'done' state of the model.
 		toggleDone: function(){
 			this.model.toggle();
-		}
+		},
 		
 		// Switch this view into'"editing"' mode, displaying the input field.
 		edit: function(){
 			$(this.el).addClass("editing");
 			this.input.focus();
+		},
+		
+		// Close the '"editing"' mode, saving changes to the todo.
+		close: function({
+			this.model.save({ text: this.input.val() });
+			$(this.el).removeClass("editing");
+		},
+		
+		// If you hit 'enter', we're through editing the item
+		updateOnEnter: function(e){
+			if (e.keyCode == 13)
+				this.close();	
+		}, 
+		
+		// Remove this view from the DOM.
+		remove: function(){
+			$(this.el).remove();
+		},
+		
+		// Remove this item, destroy the model.
+		clear: function(){
+			this.model.destroy();
 		}
+		
 	});
+	
+	// THE APPLICATION
+	// Our overall **AppView** is the top-level piece of UI.
+	window.AppView = Backbone.View.extend({
+		
+		//Instead of generating a new HTML element, bind the existing skeleton of 
+		// the App already present in the HTML
+		el:$('#todoapp'),
+		
+		// Our template for the line of statistics at the bootom of the page		
+		statsTemplate: _.template($('#stats-template').html()),
+		
+		//Delegated events for creating new items, and clearing completed ones.
+		events: {
+			"keypress #new-todo":   "createOnEnter",
+			"keyup #new-todo":		"showToolTip",	
+		},
+		
+		// At initialization we bind to the relevant events on the 'Todos'
+		// Collection, when items are added or changed.  Kick things off by loading
+		// any preexisting todos that might be saved in *localStorage*.
+		initialize: function(){
+			this.input		= this.$('#new-todo');
+			
+			Todos.bind('add', 	this.addOne, this);
+			Todos.bind('reset', this.addAll, this);
+			Todos.bind('all', this.render, this);
+			
+			Todos.fetch();
+		}, 
+		
+		// Re-rendering the App just means refreshing the statistics -- the rest 
+		// of the App doesn't change.
+		render: function(){
+			this.$('#todo-stats').html(this.statsTemplate({
+				total:		Todos.length,
+				done: 		Todos.done().length,
+				remaining: 	Todos.remaining().length
+			}));
+		},
+		
+		// Add a single todo item to the list by creating a new for it, and
+		// appending its element to the '<ul>' .
+		addOne: function(todo){
+			var view = new TodoView({model: todo});
+			this.$('#todo-list').append(view.render().el);
+		},
+		
+		// Add all items in the **Todos** collection at once.
+		addAll: function(){
+			Todos.each(this.addOne),
+		},
+		
+		// If you hit return in the main input field, and there is text to save
+		// create a new **Todo** model persisting it to  *localStorage*
+		createOnEnter: function(e){
+			var text = this.input.val();
+			if (!text || e.keyCode !=13) return;
+			Todos.create({text: text});
+			this.input.val('');
+		},
+		
+		// Lazily show the tooltip that tells you to press 'enter' to save
+		// a new todo item, after one second.
+		showTooltip: function(e){
+			var tooltip = this.$('.ui-tooltip-top');
+			var val = this.input.val();
+			tooltip.faceOut();
+			
+			if (this.tooltipTimeout) clearTimeout(this.tooltipTimeout);
+			
+			if (val == '' || val == this.input.attr('placeholder')) return;
+			
+			var show = function(){	tooltip.show().fadeIn(); };			
+			this.tooltipTimeout = _.delay(show, 1000);			
+		}
+		
+	});
+	
+	//Finally, we kick things off by creating the **APP*
+	window.App = new AppView;
+	
 });
