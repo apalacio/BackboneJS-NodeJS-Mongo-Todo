@@ -76,6 +76,40 @@ $(function(){
 			"dblclick div.todo-text"		: "edit",
 			"click span.todo-destroy"		: "clear",
 			"keypress .todo-input"			: "updateOnEnter"
+		},
+		
+		// The TodoView listen for changes to its model, re-rendering.
+		initialize: function(){
+			this.model.bind('change', this.render, this);
+			this.model.bind('destroy', this.remove, this);
+		},
+		
+		// Re-render the contents of the todo item.
+		render: function(){
+			$(this.el).html(this.template(this.model.toJSON() ));
+			this.setText();
+			return this;
+		}
+		
+		// To avoid XSS (not that if would be harmful in this particular app),
+		// we use 'jquery.text' to set the contents of the todo item
+		setText: function(){
+			var text = this.model.get('text');
+			this.$('.todo-text').text(text);
+			
+			this.input = this.$('.todo-input');
+			this.input.bind('blur', _.bind(this.close, this)).value(text);   //??????
+		}
+		
+		// Toggle the 'done' state of the model.
+		toggleDone: function(){
+			this.model.toggle();
+		}
+		
+		// Switch this view into'"editing"' mode, displaying the input field.
+		edit: function(){
+			$(this.el).addClass("editing");
+			this.input.focus();
 		}
 	});
 });
