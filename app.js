@@ -8,7 +8,7 @@ var application_root = __dirname,
 var app = express();
 
 //DB
-mongoose.connect('mongodb://localhost/my_database');
+mongoose.connect('mongodb://localhost:2000/my_database');
 
 var Todo = mongoose.model('Todo', new mongoose.Schema({
 	text: String,
@@ -22,14 +22,12 @@ app.configure(function(){
 	app.use(express.methodOverride());
 	app.use(app.router);
 	app.use(express.static(path.join(application_root, "public")));
-	//app.set('views', path.join(application_root, "views"));
-	app.set('views', '/home/apalacio/Documents/Backbone.js-Todo/views')
+	app.set('views', path.join(application_root, "views"));	
 	app.set('view engine', 'jade');
 	app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
 });
 
-var pathView = path.join(application_root, "views");
-
+console.log( path.join(application_root, "views"));
 
 //ROUTER
 app.get('/', function(req,res){
@@ -38,7 +36,6 @@ app.get('/', function(req,res){
 
 app.get('/todo', function(req, res){		
 		res.render('todo', {title: "Our Sample Application"});
-		console.log('Path: '+pathView);
 });
 	
 app.get('/api/todos', function(req, res){
@@ -95,7 +92,7 @@ app.delete('/api/todos/:id', function(req, res){
 		});
 });
 
-var serverPort = 3000;
+var serverPort = 4000;
 app.listen(serverPort);
 
 console.log('Server Started on port '+serverPort.toString());
