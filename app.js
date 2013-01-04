@@ -6,9 +6,9 @@ var application_root = __dirname,
 
 //SERVER
 var app = express();
-
+ 
 //DB
-mongoose.connect('mongodb://localhost:2000/my_database');
+mongoose.connect('mongodb://localhost:29000/my_database');
 
 var Todo = mongoose.model('Todo', new mongoose.Schema({
 	text: String,
@@ -27,7 +27,6 @@ app.configure(function(){
 	app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
 });
 
-console.log( path.join(application_root, "views"));
 
 //ROUTER
 app.get('/', function(req,res){
