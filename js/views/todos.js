@@ -10,7 +10,7 @@ define([
 			  var TodoView = Backbone.View.extend({
 		
 				    //... is a list tag.
-				    tagName:  "li",
+				    tagName:  "li", 
 			
 				    // Cache the template function for a single item.
 				    template: _.template(todosTemplate),
@@ -34,17 +34,18 @@ define([
 				    // Re-render the contents of the todo item.
 				    render: function() {
 				      $(this.el).html(this.template(this.model.toJSON()));
-				      this.setText();
+				      this.setContent();
 				      return this;
 				    },
-			
+
 				    // To avoid XSS (not that it would be harmful in this particular app),
 				    // we use `jQuery.text` to set the contents of the todo item.
-				    setText: function() {
-				      var text = this.model.get('text');
-				      this.$('.todo-text').text(text);
+				    setContent: function() {
+				      var content = this.model.get('content');
+				      this.$('.todo-content').text(content);
 				      this.input = this.$('.todo-input');
-				      this.input.bind('blur', _.bind(this.close, this)).val(text);
+				      this.input.bind('blur', this.close, this);
+				      this.input.val(content);
 				    },
 			
 				    // Toggle the `"done"` state of the model.
