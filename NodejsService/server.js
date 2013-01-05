@@ -5,7 +5,7 @@ var application_root = __dirname,
 	mongoose = require("mongoose");
 
 //DB
-mongoose.connect('mongodb://localhost/my_database');
+mongoose.connect('mongodb://localhost:30000/my_database');
 var Todo = mongoose.model('Todo', new mongoose.Schema({
 	text: String,
 	done: Boolean, 
@@ -91,7 +91,8 @@ app.delete('/api/todos/:id', function(req, res){
 		});
 });
 	
-app.listen(3000);
+app.listen(40000);
+console.log("Server up and running.."); 
 
 
 
