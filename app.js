@@ -1,13 +1,18 @@
 var application_root = __dirname,
   express = require("express"),
   path = require("path"),
-  mongoose = require('mongoose');
+  mongoose = require('mongoose'),
+  serverPort = 40000,
+  mongodbPort = 30000;
 
 var app = express();
 
-// model
-mongoose.connect('mongodb://localhost/my_database');
+//connecting mongoDb
+var mongosedbPath = 'mongodb://localhost:'+ mongodbPort.toString() +'/Todo_database';
+mongoose.connect(mongosedbPath);
 
+
+//model
 var Todo = mongoose.model('Todo', new mongoose.Schema({
   text: String,
   done: Boolean,
@@ -85,5 +90,6 @@ app.delete('/api/todos/:id', function(req, res){
     });
   });
 });
-
-app.listen(3000);
+console.log("llegue");
+app.listen(serverPort);
+console.log("Server up and running on: ")
